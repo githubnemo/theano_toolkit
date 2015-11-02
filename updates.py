@@ -5,7 +5,9 @@ except ImportError:
 import theano
 import theano.tensor as T
 import numpy as np
-import utils as U
+
+from . import utils as U
+from . import parameters
 from parameters import Parameters
 
 
