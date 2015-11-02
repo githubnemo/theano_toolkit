@@ -4,9 +4,10 @@ import theano
 import random
 import numpy as np
 from collections import OrderedDict
-import cPickle as pickle
+import pickle as pickle
 
 import inspect
+from functools import reduce
 
 
 class Parameters():
@@ -26,7 +27,7 @@ class Parameters():
                 name=name
             )
         else:
-            print "%s already assigned" % name
+            print("%s already assigned" % name)
             params[name].set_value(np.asarray(
                 array,
                 dtype=theano.config.floatX
@@ -47,12 +48,12 @@ class Parameters():
 
     def values(self):
         params = self.__dict__['params']
-        return params.values()
+        return list(params.values())
 
     def save(self, filename):
         params = self.__dict__['params']
         with open(filename, 'wb') as f:
-            pickle.dump({p.name: p.get_value() for p in params.values()}, f, 2)
+            pickle.dump({p.name: p.get_value() for p in list(params.values())}, f, 2)
 
     def load(self, filename):
         params = self.__dict__['params']
@@ -61,19 +62,19 @@ class Parameters():
             if k in loaded:
                 params[k].set_value(loaded[k])
             else:
-                print "%s does not exist." % k
+                print("%s does not exist." % k)
 
     def __enter__(self):
         _, _, _, env_locals = inspect.getargvalues(
             inspect.currentframe().f_back)
-        self.__dict__['_env_locals'] = env_locals.keys()
+        self.__dict__['_env_locals'] = list(env_locals.keys())
 
     def __exit__(self, type, value, traceback):
         _, _, _, env_locals = inspect.getargvalues(
             inspect.currentframe().f_back)
         prev_env_locals = self.__dict__['_env_locals']
         del self.__dict__['_env_locals']
-        for k in env_locals.keys():
+        for k in list(env_locals.keys()):
             if k not in prev_env_locals:
                 self.__setattr__(k, env_locals[k])
                 env_locals[k] = self.__getattr__(k)
@@ -83,7 +84,7 @@ class Parameters():
         import operator
         params = self.__dict__['params']
         count = 0
-        for p in params.values():
+        for p in list(params.values()):
             shape = p.get_value().shape
             if len(shape) == 0:
                 count += 1
@@ -98,4 +99,4 @@ if __name__ == "__main__":
     with P:
         test = np.zeros((5,))
 
-    print P.values()
+    print(list(P.values()))
